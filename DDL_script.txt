@@ -1,0 +1,136 @@
+create schema t207;
+
+set search_path to t207;
+
+create table Clans(
+	Clan_id INT PRIMARY KEY,
+	Clan_Leader VARCHAR(50),
+	Clan_name VARCHAR(50),
+	Trophies INT,
+	Curr_War_Streak INT,
+	LeaderBoard_Rank VARCHAR(50),
+	Highest_Rank VARCHAR(50)
+);
+
+create table Teams(
+	Team_id INT PRIMARY KEY,
+	Team_Name VARCHAR(30),
+	Team_Score INT
+);
+
+create table Player(
+	Player_id INT PRIMARY KEY,
+	Username VARCHAR(50),
+	E_mail VARCHAR(30),
+	"Password" VARCHAR(40),
+	"Rank" VARCHAR(40),
+	"Level" INT,
+	Skills VARCHAR(40),
+	Avail_status BOOLEAN,
+	Last_Seen DATE,
+	Clan_id INT,
+	Team_id INT,
+	FOREIGN KEY (Team_id) REFERENCES Teams(Team_id) ON DELETE CASCADE,
+	FOREIGN KEY (Clan_id) REFERENCES Clans(Clan_id) ON DELETE CASCADE
+);
+
+create table Player_stats(
+	Player_id INT PRIMARY KEY,
+	Assets INT,
+	Deaths INT,
+	Kills INT,
+	Total_wins INT,
+	Total_matches_played INT,
+	Score INT,
+	FOREIGN KEY (Player_id) REFERENCES Player(Player_id) ON DELETE CASCADE
+);
+
+create table Maps(
+	Map_id INT PRIMARY KEY,
+	Map_name VARCHAR(30),
+	Map_type VARCHAR(30),
+	Map_size VARCHAR(20)
+);
+
+create table Matches(
+	Match_id INT PRIMARY KEY,
+	Map_id INT ,
+	Game_Mode VARCHAR(30),
+	Start_Time VARCHAR(30),
+	End_Time VARCHAR(30),
+	FOREIGN KEY (Map_id) REFERENCES Maps(Map_id) ON DELETE CASCADE
+);
+
+create table Participates_in(
+	Team_id INT,
+	Match_id INT,
+	Winning_Team VARCHAR(50),
+	Losing_Team VARCHAR(50),
+	PRIMARY KEY (Team_id,Match_id),
+	FOREIGN KEY (Match_id) REFERENCES Matches(Match_id) ON DELETE CASCADE,
+	FOREIGN KEY (Team_id) REFERENCES Teams(Team_id) ON DELETE CASCADE
+);
+
+create table customization(
+	Cus_ID INT,
+	Skin VARCHAR(20),
+	Camo VARCHAR(20),
+	BackPack VARCHAR(100),
+	VehicleSkin VARCHAR(100),
+	Player_ID INT,
+	FOREIGN KEY (Player_ID) REFERENCES Player(Player_ID) ON DELETE CASCADE
+);
+
+create table Load_out(
+	Player_id INT,
+	Load_out_no INT,
+	PRIMARY KEY(Player_id,Load_out_no),
+	Perk VARCHAR(200),
+	Tactical VARCHAR(200),
+	Score_streaks VARCHAR(200),
+	Leathal VARCHAR(200),
+	Primary_weapon VARCHAR(200),
+	Secondary_weapon VARCHAR(200),
+	Special_weapon VARCHAR(200),
+	FOREIGN KEY (Player_id) REFERENCES Player(Player_id) ON DELETE CASCADE
+);
+
+create table Weapon(
+	Weapon_id INT PRIMARY KEY,
+	Fire_Rate INT,
+	Damage INT,
+	Accuracy INT,
+	"Range" INT,
+	"Control" INT,
+	Mobility INT,
+	Weapon_name VARCHAR(100),
+	Gun_type VARCHAR(100),
+	Description VARCHAR(200)
+);
+
+create table Has(
+	Player_id INT,
+	Weapon_id INT,
+	Weapon_level INT,
+	PRIMARY KEY(Player_ID,Weapon_ID),
+	FOREIGN KEY (Player_id) REFERENCES Player(Player_id) ON DELETE CASCADE,
+	FOREIGN KEY (Weapon_id) REFERENCES Weapon(Weapon_id) ON DELETE CASCADE
+);
+
+create table "Extension"(
+	Extension_id INT PRIMARY KEY,
+	Stock VARCHAR(50),
+	"Scope" VARCHAR(50),
+	Mag VARCHAR(50),
+	Grip VARCHAR(50),
+	Barrel VARCHAR(50),
+	Muzzle VARCHAR(50)
+);
+
+create table "With"(
+	Extension_id INT,
+	Weapon_id INT,
+	PRIMARY KEY(Extension_id,Weapon_ID),
+	FOREIGN KEY (Extension_id) REFERENCES "Extension"(Extension_id) ON DELETE CASCADE,
+	FOREIGN KEY (Weapon_id) REFERENCES Weapon(Weapon_id) ON DELETE CASCADE
+);
