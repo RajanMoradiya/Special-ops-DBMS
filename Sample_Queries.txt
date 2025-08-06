@@ -1,0 +1,124 @@
+-- 1. Retrieve the top 10 clans based on trophies.
+SELECT * FROM Clans ORDER BY Trophies DESC LIMIT 10;
+
+-- 2. Find the players who have the highest number of kills.
+SELECT * FROM Player_stats ORDER BY Kills DESC LIMIT 10;
+
+-- 3. Identify the clans with the longest current war streak.
+SELECT * FROM Clans ORDER BY Curr_War_Streak DESC LIMIT 10;
+
+-- 4. List the players with the highest leaderboard rank.
+SELECT * FROM Player ORDER BY "Rank" DESC LIMIT 10;
+
+-- 5. Show the most played game modes.
+SELECT Game_Mode, COUNT(*) AS Num_Of_Matches FROM Matches GROUP BY Game_Mode ORDER BY Num_Of_Matches DESC LIMIT 5;
+
+-- 6. Retrieve the top 10 players with the highest scores.
+SELECT * FROM Player_stats ORDER BY Score DESC LIMIT 10;
+
+-- 7. Identify the most used weapons by players.
+SELECT Weapon_id, Weapon_name, COUNT(*) AS Usage_Count FROM Has JOIN Weapon USING(Weapon_id) GROUP BY Weapon_id, Weapon_name ORDER BY Usage_Count DESC LIMIT 10;
+
+-- 8. List the players with the highest number of assets.
+SELECT * FROM Player_stats ORDER BY Assets DESC LIMIT 10;
+
+-- 9. Show all player's clan IDs.
+SELECT DISTINCT Clan_id FROM Player WHERE Clan_id IS NOT NULL;
+
+-- 10. Retrieve all player's team IDs.
+SELECT DISTINCT Team_id FROM Player WHERE Team_id IS NOT NULL;
+
+-- 11. List players who are currently online.
+SELECT * FROM Player WHERE Avail_status = TRUE;
+
+-- 12. Show clans with their corresponding leaderboards rank.
+SELECT Clan_name, LeaderBoard_Rank FROM Clans;
+
+-- 13. Retrieve players with their corresponding clan names.
+SELECT Player.Username, Clans.Clan_name FROM Player LEFT JOIN Clans ON Player.Clan_id = Clans.Clan_id;
+
+-- 14. List all players along with their team names.
+SELECT Player.Username, Teams.Team_Name FROM Player LEFT JOIN Teams ON Player.Team_id = Teams.Team_id;
+
+-- 15. Show players along with their most used weapon.
+SELECT Player.Username, Weapon.Weapon_name FROM Player JOIN Has ON Player.Player_id = Has.Player_id JOIN Weapon ON Has.Weapon_id = Weapon.Weapon_id GROUP BY Player.Username, Weapon.Weapon_name ORDER BY COUNT(*) DESC;
+
+-- 16. Show players who have not set their last seen date.
+SELECT * FROM Player WHERE Last_Seen IS NULL;
+
+-- 17. Retrieve players who have set their email addresses.
+SELECT * FROM Player WHERE E_mail IS NOT NULL;
+
+-- 18. List clans along with their total trophies.
+SELECT Clan_name, SUM(Trophies) AS Total_Trophies FROM Clans GROUP BY Clan_name;
+
+-- 19. Show teams along with their total scores.
+SELECT Team_Name, SUM(Team_Score) AS Total_Score FROM Teams GROUP BY Team_Name;
+
+-- 20. List players along with their total assets.
+SELECT Player.Username, SUM(Assets) AS Total_Assets FROM Player JOIN Player_stats ON Player.Player_id = Player_stats.Player_id GROUP BY Player.Username;
+
+-- 21. Show players who have achieved a specific rank.
+SELECT * FROM Player WHERE "Rank" = 'Legendary';
+
+-- 22. Find players who have a higher score than their clan leader.
+SELECT P1.Username, P1.Skills
+FROM Player P1
+JOIN Clans C ON P1.Clan_id = C.Clan_id
+JOIN Player P2 ON C.Clan_Leader = P2.Username
+WHERE P1.Skills > (SELECT MAX(Skills) FROM Player WHERE Username = C.Clan_Leader);
+
+-- 23. Identify players who have the same username and email.
+SELECT * FROM Player P1 JOIN Player P2 ON P1.Username = P2.Username AND P1.E_mail = P2.E_mail WHERE P1.Player_id <> P2.Player_id;
+
+-- 24. List players along with their most used loadout in terms of kills.
+SELECT Player.Username, Load_out.Load_out_no, SUM(Player_stats.Kills) AS Total_Kills
+FROM Player
+JOIN Load_out ON Player.Player_id = Load_out.Player_id
+JOIN Has ON Player.Player_id = Has.Player_id
+JOIN Player_stats ON Player.Player_id = Player_stats.Player_id
+GROUP BY Player.Username, Load_out.Load_out_no
+ORDER BY Total_Kills DESC;
+
+-- 25. List players along with their clan leaders.
+SELECT Player.Username, Clans.Clan_Leader
+FROM Player
+JOIN Clans ON Player.Clan_id = Clans.Clan_id;
+
+-- 26. Show players who have achieved a higher score than the average score of all players.
+SELECT Player.Username, Player_stats.Score
+FROM Player
+JOIN Player_stats ON Player.Player_id = Player_stats.Player_id
+WHERE Player_stats.Score > (
+    SELECT AVG(Score) FROM Player_stats
+);
+
+-- 27. List clans with their respective average trophies.
+SELECT Clan_id, Clan_name, AVG(Trophies) AS Avg_Trophies FROM Clans GROUP BY Clan_id, Clan_name;
+
+-- 28. Show players along with their most used weapon type.
+SELECT Player.Username, Weapon.Gun_type
+FROM Player
+JOIN Has ON Player.Player_id = Has.Player_id
+JOIN Weapon ON Has.Weapon_id = Weapon.Weapon_id
+GROUP BY Player.Username, Weapon.Gun_type
+ORDER BY COUNT(*) DESC;
+
+-- 29. Retrieve players who have used all available weapons.
+SELECT Player_id, COUNT(DISTINCT Weapon_id) AS Unique_Weapons
+FROM Has
+GROUP BY Player_id
+HAVING COUNT(DISTINCT Weapon_id) = (SELECT COUNT(DISTINCT Weapon_id) FROM Weapon);
+
+-- 30. Show clans with the highest average number of trophies.
+SELECT Clan_id, Clan_name, AVG(Trophies) AS Avg_Trophies
+FROM Clans
+GROUP BY Clan_id, Clan_name
+ORDER BY AVG(Trophies) DESC
+LIMIT 1;
+
+-- 31. List players along with their total number of deaths and kills.
+SELECT Player.Username, SUM(Deaths) AS Total_Deaths, SUM(Kills) AS Total_Kills
+FROM Player
+JOIN Player_stats ON Player.Player_id = Player_stats.Player_id
+GROUP BY Player.Username;
